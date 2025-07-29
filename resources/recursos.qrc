@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
     <file>Antodrogas.ico</file>
+    <file>logo_pdf.png</file>
   </qresource>
 </RCC>

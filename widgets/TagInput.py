@@ -21,11 +21,29 @@ class TagInput(QWidget):
 
         # FlowLayout para los tags
         self.flow_widget = QWidget()
+        self.flow_widget.setObjectName("tagContainer")
         self.flow_layout = FlowLayout()
         self.flow_widget.setLayout(self.flow_layout)
 
+        self.flow_widget.setStyleSheet("""
+            QWidget#tagContainer {
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                background-color: #f9f9f9;
+                padding: 5px;
+            }
+        """)
+
         # Scroll area para los tags si hay muchos
         self.scroll_area = QScrollArea()
+        self.scroll_area.setStyleSheet( 
+        """QScrollArea {
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                background-color: #f9f9f9;
+                padding: 5px;
+            }
+        """)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.flow_widget)
         self.scroll_area.setFixedHeight(100)
