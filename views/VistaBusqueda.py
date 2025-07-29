@@ -82,6 +82,9 @@ class VistaBusqueda(QWidget):
 
         # --- Lista de PDFs seleccionados ---
         self.lista_pdf_layout = QVBoxLayout()
+        self.lista_pdf_layout.setAlignment(Qt.AlignTop)
+        self.lista_pdf_layout.setSpacing(6)
+        
         self.lista_pdf_container = QWidget()
         self.lista_pdf_container.setStyleSheet("""
             QWidget {

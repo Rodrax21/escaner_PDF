@@ -24,6 +24,7 @@ class TagInput(QWidget):
         self.flow_widget.setObjectName("tagContainer")
         self.flow_layout = FlowLayout()
         self.flow_widget.setLayout(self.flow_layout)
+        self.flow_widget.setContentsMargins(5,5,5,5)
 
         self.flow_widget.setStyleSheet("""
             QWidget#tagContainer {
