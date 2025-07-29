@@ -1,7 +1,12 @@
 import sys
+import ctypes
+import os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget
+from PyQt5.QtGui import QIcon
 from views.VistaBusqueda import VistaBusqueda
 from views.VistaResultados import VistaResultados
+
+from resources import recursos
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -12,6 +17,10 @@ class MainWindow(QMainWindow):
         # Stacked widget para cambiar de vistas
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
+
+        self.setWindowIcon(QIcon(":/Antodrogas.ico"))
+
+        self.centrar_ventana()
 
         # Crear vistas
         print("Inicializando vistas")
@@ -37,8 +46,24 @@ class MainWindow(QMainWindow):
     def volver_a_inicio(self):
         self.stack.setCurrentIndex(0)
 
+    def centrar_ventana(self):
+        # Obtener geometría de la pantalla actual (donde está el cursor)
+        pantalla = QApplication.primaryScreen()
+        rect_pantalla = pantalla.availableGeometry()
+
+        # Obtener el rectángulo de la ventana y moverla
+        rect_ventana = self.frameGeometry()
+        rect_ventana.moveCenter(rect_pantalla.center())
+        self.move(rect_ventana.topLeft())
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(":/Antodrogas.ico"))
+
+    # Forzar el cambio del ícono en la barra de tareas 
+    if os.name == 'nt': # Solo pasa este if si la computadora que lo ejecuta es de Windows)
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u"mi_aplicacion.unica.id")
+
     ventana = MainWindow()
     ventana.show()
     sys.exit(app.exec_())

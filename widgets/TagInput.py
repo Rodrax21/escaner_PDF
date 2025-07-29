@@ -1,31 +1,44 @@
 from PyQt5.QtWidgets import (
-    QWidget, QHBoxLayout, QLineEdit, QLabel, QPushButton, QFrame,QScrollArea
+    QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel,
+    QPushButton, QFrame, QScrollArea, QSizePolicy
 )
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
-from widgets.FlowLayout import FlowLayout 
+from widgets.FlowLayout import FlowLayout
+
 
 class TagInput(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.layout = QHBoxLayout()
-        self.layout.setSpacing(6)
-        self.layout.setContentsMargins(5, 5, 5, 5)
-        self.setLayout(self.layout)
-
         self.tags = []
+
+        # Entrada superior (donde se escribe)
         self.input = QLineEdit()
         self.input.setPlaceholderText("Escribí palabras y presioná coma o Enter")
         self.input.returnPressed.connect(self.convertir_a_tag)
         self.input.textChanged.connect(self.chequear_coma)
 
+        # FlowLayout para los tags
+        self.flow_widget = QWidget()
+        self.flow_layout = FlowLayout()
+        self.flow_widget.setLayout(self.flow_layout)
+
+        # Scroll area para los tags si hay muchos
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setFixedHeight(150)
+        self.scroll_area.setWidget(self.flow_widget)
+        self.scroll_area.setFixedHeight(100)
+        self.scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.layout.addWidget(self.input)
+        # Layout final (input arriba, tags abajo)
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(5)
+        self.main_layout.addWidget(self.input)
+        self.main_layout.addWidget(self.scroll_area)
 
+        self.setLayout(self.main_layout)
 
     def chequear_coma(self):
         texto = self.input.text()
@@ -47,7 +60,6 @@ class TagInput(QWidget):
 
         self.tags.append(texto)
 
-        # Crear contenedor visual del tag (etiqueta + botón)
         tag_frame = QFrame()
         tag_layout = QHBoxLayout()
         tag_layout.setContentsMargins(10, 2, 10, 2)
@@ -82,14 +94,13 @@ class TagInput(QWidget):
             }
         """)
 
-        self.layout.insertWidget(self.layout.count() - 1, tag_frame)
+        self.flow_layout.addWidget(tag_frame)
 
     def eliminar_tag(self, texto, frame):
         if texto in self.tags:
             self.tags.remove(texto)
-        self.layout.removeWidget(frame)
+        self.flow_layout.removeWidget(frame)
         frame.deleteLater()
 
     def obtener_tags(self):
         return self.tags
-
