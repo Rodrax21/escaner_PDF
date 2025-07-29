@@ -1,19 +1,26 @@
 from PyQt5.QtWidgets import (
-    QWidget, QLabel, QLineEdit, QPushButton,
-    QFileDialog, QListWidget, QVBoxLayout, QHBoxLayout, QScrollArea
+    QWidget, QLabel, QPushButton,
+    QFileDialog, QVBoxLayout, QHBoxLayout, QScrollArea
 )
 import os
 from pathlib import Path
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread
+
 from widgets.TagInput import TagInput
 from widgets.EtiquetaPDF import EtiquetaPDF
+from logic.WorkerBusqueda import WorkerBusqueda
+from views.VistaCarga import VistaCarga
 
 class VistaBusqueda(QWidget):
     def __init__(self, main_window):
         super().__init__()
         self.main_window = main_window
+
         self.rutas_pdf = set()  # Usar un set para evitar duplicados
+        class Emisor(QObject):
+            archivos_cambiaron = pyqtSignal()
+
+        self.emisor = Emisor()
 
         self.setStyleSheet("""
             QWidget {
@@ -45,9 +52,13 @@ class VistaBusqueda(QWidget):
                 font-weight: bold;
                 color: white;
             }
-            QPushButton:hover {
+            QPushButton:hover#boton_vista {
                 background-color: #357abd;
             }
+            QPushButton:disabled#boton_vista {
+                background-color: #cccccc;
+                color: #666666;
+            }               
         """)
 
         # Layout principal
@@ -76,15 +87,20 @@ class VistaBusqueda(QWidget):
         self.boton_pdf.clicked.connect(self.abrir_dialogo_pdf)
 
         # --- Botón continuar ---
-        self.boton_continuar = QPushButton("Buscar y continuar")
+        self.boton_continuar = QPushButton("Comenzar búsqueda")
         self.boton_continuar.setObjectName("boton_vista")
-        self.boton_continuar.clicked.connect(self.continuar)
+        self.boton_continuar.clicked.connect(self.iniciar_busqueda)
+
+        # Inhabilitar botón al inicio y habilitarlo cuando haya PDFs y palabras clave
+        self.boton_continuar.setEnabled(False)
+        self.input_palabras.emisor.tags_cambiaron.connect(self.actualizar_estado_boton_buscar)
+        self.emisor.archivos_cambiaron.connect(self.actualizar_estado_boton_buscar)
 
         # --- Lista de PDFs seleccionados ---
         self.lista_pdf_layout = QVBoxLayout()
         self.lista_pdf_layout.setAlignment(Qt.AlignTop)
         self.lista_pdf_layout.setSpacing(6)
-        
+
         self.lista_pdf_container = QWidget()
         self.lista_pdf_container.setStyleSheet("""
             QWidget {
@@ -104,6 +120,26 @@ class VistaBusqueda(QWidget):
                 background-color: #f9f9f9;
                 padding: 5px;
             }
+            QScrollBar:vertical {
+                background: #f0f0f0;
+                width: 10px;
+                margin: 2px 2px 2px 2px;
+                border-radius: 4px;
+            }
+
+            QScrollBar::handle:vertical {
+                background: #999;
+                min-height: 20px;
+                border-radius: 4px;
+            }
+
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0;
+            }
+
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }                              
         """)
         self.scroll_area_pdf.setWidgetResizable(True)
         self.scroll_area_pdf.setWidget(self.lista_pdf_container)
@@ -134,6 +170,7 @@ class VistaBusqueda(QWidget):
                 self.rutas_pdf.add(ruta)
                 etiqueta = EtiquetaPDF(ruta, self.remover_pdf)
                 self.lista_pdf_layout.addWidget(etiqueta)
+        self.emisor.archivos_cambiaron.emit()
 
     def remover_pdf(self, item):
         ruta_str = item.pdf_path.resolve()
@@ -141,12 +178,50 @@ class VistaBusqueda(QWidget):
             self.lista_pdf_layout.removeWidget(item)
             item.deleteLater()
             self.rutas_pdf.remove(ruta_str)
+            self.emisor.archivos_cambiaron.emit()
             # El widget ya se elimina con .setParent(None) desde EtiquetaPDF
 
-    def continuar(self):
+    def informar_estado(self):
         palabras = self.input_palabras.obtener_tags()
-        palabras = [p.strip() for p in palabras if p.strip()]
-        if palabras and self.rutas_pdf:
-            self.main_window.cambiar_a_resultados(palabras, self.rutas_pdf)
+        palabras_clave = [p.strip() for p in palabras if p.strip()]
+        print(f"Palabras clave: {palabras_clave}")
+        print(f"Archivos PDF seleccionados: {[str(r) for r in self.rutas_pdf]}")
+
+    def actualizar_estado_boton_buscar(self):
+        hay_palabras = self.input_palabras.obtener_tags() != []
+        hay_pdfs = self.rutas_pdf.__len__() > 0
+
+        if hay_palabras and hay_pdfs:
+            self.boton_continuar.setEnabled(True)
         else:
-            print("Faltan palabras clave o archivos PDF")
+            self.boton_continuar.setEnabled(False)
+
+    def iniciar_busqueda(self):
+        self.informar_estado()
+
+        self.dialogo_carga = VistaCarga(self)
+        self.dialogo_carga.show()
+        self.dialogo_carga.centrar_en_ventana_principal()
+
+        # Crear el hilo y el worker
+        self.thread = QThread()
+        self.worker = WorkerBusqueda(self.rutas_pdf, self.input_palabras.obtener_tags())
+
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.run)
+
+        self.worker.terminado.connect(self.resultado_busqueda)
+        self.worker.terminado.connect(self.dialogo_carga.close)
+        self.worker.terminado.connect(self.thread.quit)
+
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.start()
+
+    def resultado_busqueda(self, resultado):
+        try:
+            self.main_window.vista_2.volverSignal.disconnect()
+        except TypeError:
+            pass  # No estaba conectado aún
+
+        self.main_window.vista_2.volverSignal.connect(self.main_window.volver_a_inicio)
+        self.main_window.cambiar_a_resultados(resultado)

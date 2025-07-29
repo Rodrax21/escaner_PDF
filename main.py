@@ -38,23 +38,21 @@ class MainWindow(QMainWindow):
 
         self.stack.setCurrentIndex(0)
 
-    def cambiar_a_resultados(self, palabras_clave, archivos_pdf):
+    def cambiar_a_resultados(self, resultados):
         # Pasamos datos a la segunda vista antes de cambiar
-        self.vista_2.mostrar_resultados(palabras_clave, archivos_pdf)
+        self.vista_2.mostrar_resultados(resultados)
         self.stack.setCurrentIndex(1)
 
     def volver_a_inicio(self):
         self.stack.setCurrentIndex(0)
 
     def centrar_ventana(self):
-        # Obtener geometría de la pantalla actual (donde está el cursor)
-        pantalla = QApplication.primaryScreen()
-        rect_pantalla = pantalla.availableGeometry()
-
-        # Obtener el rectángulo de la ventana y moverla
-        rect_ventana = self.frameGeometry()
-        rect_ventana.moveCenter(rect_pantalla.center())
-        self.move(rect_ventana.topLeft())
+        # Centrar ventana en la pantalla principal
+        screen = QApplication.primaryScreen()
+        screen_geometry = screen.availableGeometry()
+        x = screen_geometry.center().x() - self.width() // 2
+        y = screen_geometry.center().y() - self.height() // 2
+        self.move(x, y)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -66,4 +64,5 @@ if __name__ == '__main__':
 
     ventana = MainWindow()
     ventana.show()
+    ventana.centrar_ventana()
     sys.exit(app.exec_())

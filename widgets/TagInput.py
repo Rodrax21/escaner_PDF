@@ -3,8 +3,9 @@ from PyQt5.QtWidgets import (
     QPushButton, QFrame, QScrollArea, QSizePolicy
 )
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QObject
 from widgets.FlowLayout import FlowLayout
+from PyQt5.QtCore import pyqtSignal
 
 
 class TagInput(QWidget):
@@ -12,6 +13,10 @@ class TagInput(QWidget):
         super().__init__()
 
         self.tags = []
+        class Emisor(QObject):
+            tags_cambiaron = pyqtSignal()
+
+        self.emisor = Emisor()
 
         # Entrada superior (donde se escribe)
         self.input = QLineEdit()
@@ -43,6 +48,26 @@ class TagInput(QWidget):
                 border-radius: 10px;
                 background-color: #f9f9f9;
                 padding: 5px;
+            }
+            QScrollBar:vertical {
+                background: #f0f0f0;
+                width: 10px;
+                margin: 2px 2px 2px 2px;
+                border-radius: 4px;
+            }
+
+            QScrollBar::handle:vertical {
+                background: #999;
+                min-height: 20px;
+                border-radius: 4px;
+            }
+
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0;
+            }
+
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
             }
         """)
         self.scroll_area.setWidgetResizable(True)
@@ -115,11 +140,15 @@ class TagInput(QWidget):
 
         self.flow_layout.addWidget(tag_frame)
 
+        self.emisor.tags_cambiaron.emit()  # Emitir señal de cambio
+
     def eliminar_tag(self, texto, frame):
         if texto in self.tags:
             self.tags.remove(texto)
         self.flow_layout.removeWidget(frame)
         frame.deleteLater()
+
+        self.emisor.tags_cambiaron.emit()  # Emitir señal de cambio
 
     def obtener_tags(self):
         return self.tags
