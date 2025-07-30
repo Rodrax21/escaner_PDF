@@ -2,9 +2,12 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from pathlib import Path
 import fitz  # PyMuPDF
 import os
+from datetime import datetime
+from PyPDF2 import PdfReader, PdfWriter
 from PyQt5.QtWidgets import QMessageBox
 
 class WorkerBusqueda(QObject):
+    volverSignal = pyqtSignal()
     terminado = pyqtSignal(object)  # Signal to emit results
 
     def __init__(self, archivos_pdf, palabras_clave):
@@ -56,5 +59,72 @@ class WorkerBusqueda(QObject):
         return self.resultados
     
     def exportar_resultados(self):
-        # Implementar lógica para exportar resultados a un archivo
-        pass
+        if not self.resultados:
+            QMessageBox.warning(None, "Sin resultados", "No hay resultados para exportar.")
+            return
+
+        # Obtener fecha y hora para la carpeta principal
+        timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+        base_dir = os.path.join(os.path.expanduser("~"), "Documents", "Extraccion del Escaner PDF", timestamp)
+        
+        final_dir = base_dir
+        counter = 1
+
+        # Bucle para verificar existencia y agregar sufijo incremental
+        while os.path.exists(final_dir):
+            final_dir = base_dir + f"_{counter}"
+            counter += 1
+
+        # Crear la carpeta final
+        os.makedirs(final_dir, exist_ok=False)
+
+        # palabra_clave -> {ruta_pdf: [páginas]}
+        estructura_exportacion = {}
+
+        for ruta_pdf, paginas in self.resultados.items():
+            for pagina, palabras in paginas.items():
+                for palabra in palabras:
+                    if palabra not in estructura_exportacion:
+                        estructura_exportacion[palabra] = {}
+
+                    if ruta_pdf not in estructura_exportacion[palabra]:
+                        estructura_exportacion[palabra][ruta_pdf] = set()
+
+                    estructura_exportacion[palabra][ruta_pdf].add(pagina)
+
+        # Exportar
+        for palabra, archivos in estructura_exportacion.items():
+            for ruta_pdf, paginas_set in archivos.items():
+                try:
+                    reader = PdfReader(ruta_pdf)
+                    writer = PdfWriter()
+
+                    paginas_ordenadas = sorted(paginas_set)
+
+                    for num_pagina in paginas_ordenadas:
+                        if 0 <= num_pagina < len(reader.pages):
+                            writer.add_page(reader.pages[num_pagina-1])
+                        else:
+                            print(f"Página {num_pagina} fuera de rango en {ruta_pdf}")
+
+                    # Preparar rutas
+                    nombre_archivo = os.path.basename(ruta_pdf)
+                    nombre_salida = f"Hojas de {nombre_archivo}"
+                    carpeta_salida = os.path.join(base_dir, palabra)
+                    os.makedirs(carpeta_salida, exist_ok=True)
+
+                    ruta_salida = os.path.join(carpeta_salida, nombre_salida)
+
+                    # Guardar nuevo PDF
+                    with open(ruta_salida, "wb") as f:
+                        writer.write(f)
+
+                except Exception as e:
+                    print(f"Error exportando {ruta_pdf} para palabra '{palabra}': {e}")
+
+        # Mostrar mensaje de finalización
+        QMessageBox.information(None, "Exportación completada",
+                                f"Los resultados fueron exportados correctamente a:\n\n{base_dir}")
+
+        # Volver a la pantalla inicial (VistaBusqueda)
+        self.volverSignal.emit()

@@ -238,9 +238,17 @@ class VistaBusqueda(QWidget):
         try:
             self.main_window.vista_2.volverSignal.disconnect()
             self.main_window.vista_2.exportarSignal.disconnect()
+            self.worker.volverSignal.disconnect()
         except TypeError:
             pass  # No estaba conectado aún
 
+        print(self.worker)
+        # Conectar señales de la vista de resultados
         self.main_window.vista_2.volverSignal.connect(self.main_window.volver_a_inicio)
-        self.main_window.vista_2.exportarSignal.connect(self.worker.exportar_resultados)
+        self.main_window.vista_2.exportarSignal.connect(self.exportar)
+        self.worker.volverSignal.connect(self.main_window.volver_a_inicio)
+
         self.main_window.cambiar_a_resultados(resultado)
+
+    def exportar(self):
+        self.worker.exportar_resultados()

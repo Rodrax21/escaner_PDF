@@ -27,7 +27,6 @@ class VistaResultados(QWidget):
         #self.titulo.setFont(QFont("Arial", 18, QFont.Bold))
         self.layout_principal.addWidget(self.titulo)
 
-        # Scroll para que sea navegable si hay muchos resultados
         # Scroll para resultados
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
