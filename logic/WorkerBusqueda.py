@@ -32,8 +32,8 @@ class WorkerBusqueda(QObject):
         resultados = {}
 
         for ruta_pdf in self.archivos_pdf:
-            nombre_archivo = os.path.basename(Path(ruta_pdf))
-            resultados[nombre_archivo] = {}
+            ruta_archivo = Path(ruta_pdf)
+            resultados[ruta_archivo] = {}
 
             try:
                 doc = fitz.open(ruta_pdf)
@@ -42,7 +42,7 @@ class WorkerBusqueda(QObject):
                     coincidencias = [palabra for palabra in self.palabras_clave if palabra.lower() in texto]
 
                     if coincidencias:
-                        resultados[nombre_archivo][num_pagina] = coincidencias
+                        resultados[ruta_archivo][num_pagina] = coincidencias
 
                 doc.close()
 
@@ -54,3 +54,7 @@ class WorkerBusqueda(QObject):
 
     def obtener_resultados(self):
         return self.resultados
+    
+    def exportar_resultados(self):
+        # Implementar lógica para exportar resultados a un archivo
+        pass

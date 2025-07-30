@@ -126,20 +126,37 @@ class VistaBusqueda(QWidget):
                 margin: 2px 2px 2px 2px;
                 border-radius: 4px;
             }
-
             QScrollBar::handle:vertical {
                 background: #999;
                 min-height: 20px;
                 border-radius: 4px;
             }
-
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                 height: 0;
             }
-
             QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
                 background: none;
-            }                              
+            }
+            QScrollBar:horizontal {
+                background: #f0f0f0;
+                height: 10px;
+                margin: 2px;
+                border-radius: 4px;
+            }
+
+            QScrollBar::handle:horizontal {
+                background: #999;
+                min-width: 20px;
+                border-radius: 4px;
+            }
+
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0;
+            }
+
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: none;
+            }                                                                                           
         """)
         self.scroll_area_pdf.setWidgetResizable(True)
         self.scroll_area_pdf.setWidget(self.lista_pdf_container)
@@ -220,8 +237,10 @@ class VistaBusqueda(QWidget):
     def resultado_busqueda(self, resultado):
         try:
             self.main_window.vista_2.volverSignal.disconnect()
+            self.main_window.vista_2.exportarSignal.disconnect()
         except TypeError:
             pass  # No estaba conectado aún
 
         self.main_window.vista_2.volverSignal.connect(self.main_window.volver_a_inicio)
+        self.main_window.vista_2.exportarSignal.connect(self.worker.exportar_resultados)
         self.main_window.cambiar_a_resultados(resultado)
