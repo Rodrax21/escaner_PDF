@@ -2,7 +2,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from pathlib import Path
 import fitz  # PyMuPDF
 import os
-import re
+#import re
 from datetime import datetime
 from PyPDF2 import PdfReader, PdfWriter
 from PyQt5.QtWidgets import QMessageBox
@@ -106,9 +106,9 @@ class WorkerBusqueda(QObject):
 
                     paginas_ordenadas = sorted(paginas_set)
 
-                    for num_pagina in paginas_ordenadas:
+                    for num_pagina in paginas_ordenadas:                # num_paginas va desde 1 hasta n
                         if 0 < num_pagina <= len(reader.pages):
-                            writer.add_page(reader.pages[num_pagina-1])#
+                            writer.add_page(reader.pages[num_pagina-1]) # resta 1 porque PyPDF2 usa 0-indexed
                         else:
                             print(f"Página {num_pagina} fuera de rango en {ruta_pdf}")
 

@@ -1,7 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QPushButton, QLabel, QScrollArea, QHBoxLayout, QFrame
-from PyQt5.QtGui import QPixmap, QFont
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QScrollArea, QHBoxLayout, QFrame, QSizePolicy
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtWidgets import QSizePolicy
 from collections import defaultdict
 import os
 

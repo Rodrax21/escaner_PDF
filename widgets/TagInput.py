@@ -7,7 +7,6 @@ from PyQt5.QtCore import QObject
 from widgets.FlowLayout import FlowLayout
 from PyQt5.QtCore import pyqtSignal
 
-
 class TagInput(QWidget):
     def __init__(self):
         super().__init__()

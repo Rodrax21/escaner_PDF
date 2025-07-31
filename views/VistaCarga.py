@@ -1,8 +1,7 @@
 # views/VistaCarga.py
-from PyQt5.QtWidgets import QDialog, QLabel
+from PyQt5.QtWidgets import QDialog, QLabel, QApplication
 from PyQt5.QtGui import QMovie
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication
 
 from resources import recursos  # Asegúrate de que este recurso esté definido en tu archivo .qrc
 

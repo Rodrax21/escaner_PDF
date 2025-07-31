@@ -1,4 +1,6 @@
 *.pyc
-*.spec 
+*.spec
+*.iss 
 /build/
 /dist/
+/Output/
