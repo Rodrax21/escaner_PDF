@@ -2,6 +2,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from pathlib import Path
 import fitz  # PyMuPDF
 import os
+import re
 from datetime import datetime
 from PyPDF2 import PdfReader, PdfWriter
 from PyQt5.QtWidgets import QMessageBox
@@ -43,6 +44,10 @@ class WorkerBusqueda(QObject):
                 for num_pagina, pagina in enumerate(doc, start=1):
                     texto = pagina.get_text().lower()
                     coincidencias = [palabra for palabra in self.palabras_clave if palabra.lower() in texto]
+                    #coincidencias = [
+                    #    palabra for palabra in self.palabras_clave
+                    #    if re.search(rf'\b{re.escape(palabra.lower())}\b', texto.lower())
+                    #] #Evita busquedas parciales
 
                     if coincidencias:
                         resultados[ruta_archivo][num_pagina] = coincidencias
@@ -102,15 +107,15 @@ class WorkerBusqueda(QObject):
                     paginas_ordenadas = sorted(paginas_set)
 
                     for num_pagina in paginas_ordenadas:
-                        if 0 <= num_pagina < len(reader.pages):
-                            writer.add_page(reader.pages[num_pagina-1])
+                        if 0 < num_pagina <= len(reader.pages):
+                            writer.add_page(reader.pages[num_pagina-1])#
                         else:
                             print(f"Página {num_pagina} fuera de rango en {ruta_pdf}")
 
                     # Preparar rutas
                     nombre_archivo = os.path.basename(ruta_pdf)
                     nombre_salida = f"Hojas de {nombre_archivo}"
-                    carpeta_salida = os.path.join(base_dir, palabra)
+                    carpeta_salida = os.path.join(final_dir, palabra)
                     os.makedirs(carpeta_salida, exist_ok=True)
 
                     ruta_salida = os.path.join(carpeta_salida, nombre_salida)
@@ -120,11 +125,12 @@ class WorkerBusqueda(QObject):
                         writer.write(f)
 
                 except Exception as e:
-                    print(f"Error exportando {ruta_pdf} para palabra '{palabra}': {e}")
+                    print(f"Error exportando {final_dir} para palabra '{palabra}': {e}")
+                    QMessageBox.critical(self, f"Error al exportar {final_dir} para palabra '{palabra}'", f"No se pudo exportar el pdf:\n{str(e)}")
 
         # Mostrar mensaje de finalización
         QMessageBox.information(None, "Exportación completada",
-                                f"Los resultados fueron exportados correctamente a:\n\n{base_dir}")
+                                f"Los resultados fueron exportados correctamente a:\n\n{final_dir}")
 
         # Volver a la pantalla inicial (VistaBusqueda)
         self.volverSignal.emit()
