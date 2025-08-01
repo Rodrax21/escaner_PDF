@@ -1,0 +1,50 @@
+name: Build PDF Scanner Installer
+
+on:
+  push:
+    branches:
+      - main  # Cambiá si usás otra rama
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      # Descarga tu código desde GitHub
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # Instala la versión de Python necesaria
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.4'  # O la que uses localmente
+
+      # Instala las dependencias de tu programa
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pymupdf PyPDF2 PyQt5
+
+      # Ejecuta PyInstaller con tu archivo .spec
+      - name: Run PyInstaller
+        run: |
+          pyinstaller Scanner_PDF.spec
+
+      # Descarga e instala Inno Setup de forma silenciosa
+      - name: Install Inno Setup
+        run: |
+          Invoke-WebRequest https://jrsoftware.org/download.php/ispack-unicode.exe -OutFile issetup.exe
+          Start-Process -Wait -FilePath .\issetup.exe -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-'
+
+      # Compila el instalador usando tu archivo .iss personalizado
+      - name: Build installer with Inno Setup
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "script_instalacion.iss"
+
+      # Sube el archivo instalador generado a GitHub Actions como artefacto descargable
+      - name: Upload artifact (installer)
+        uses: actions/upload-artifact@v3
+        with:
+          name: PDF-Scanner-Installer
+          path: Output/*.exe  # Asegurate de que tu .iss guarda el .exe ahí

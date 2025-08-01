@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QSizePolicy
-from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QSizePolicy
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from pathlib import Path
 

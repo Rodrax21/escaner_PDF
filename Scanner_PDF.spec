@@ -1,0 +1,67 @@
+# -*- mode: python ; coding: utf-8 -*-
+
+a = Analysis(
+    ['main.py'],
+    pathex=[],
+    binaries=[],
+    datas=[],
+    hiddenimports=[
+        'PyQt5.QtCore',
+        'PyQt5.QtGui',
+        'PyQt5.QtWidgets',
+        'fitz',
+        'PyPDF2',
+        'email',
+        'http',
+        'xml',
+    ],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[
+        'tkinter',
+        'unittest',
+        'numpy',
+        'scipy',
+        'matplotlib',
+        'PyQt5.QtWebEngineWidgets',
+        'PyQt5.QtMultimedia',
+        'PyQt5.QtNetwork',
+        'PyQt5.QtPositioning',
+        'PyQt5.QtSerialPort',
+        'PyQt5.QtBluetooth',
+        'PyQt5.QtSensors',
+        'PyQt5.QtWebSockets',
+    ],
+    noarchive=False,
+    optimize=0,
+)
+pyz = PYZ(a.pure)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    [],
+    exclude_binaries=True,
+    name='PDF Scanner v1',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=False,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+    icon='resources/Antodrogas.ico',
+)
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=False,
+    upx=False,
+    upx_exclude=[],
+    name='PDF Scanner v1',
+)
