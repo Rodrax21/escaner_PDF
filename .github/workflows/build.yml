@@ -32,10 +32,8 @@ jobs:
           pyinstaller Scanner_PDF.spec
 
       # Descarga e instala Inno Setup de forma silenciosa
-      - name: Install Inno Setup
-        run: |
-          Invoke-WebRequest https://jrsoftware.org/download.php/ispack-unicode.exe -OutFile issetup.exe
-          Start-Process -Wait -FilePath .\issetup.exe -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-'
+      - name: Install Inno Setup via Chocolatey
+        run: choco install innosetup --yes
 
       # Compila el instalador usando tu archivo .iss personalizado
       - name: Build installer with Inno Setup
