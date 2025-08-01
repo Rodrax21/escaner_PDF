@@ -44,7 +44,7 @@ jobs:
 
       # Sube el archivo instalador generado a GitHub Actions como artefacto descargable
       - name: Upload artifact (installer)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: PDF-Scanner-Installer
           path: Output/*.exe  # Asegurate de que tu .iss guarda el .exe ahí
