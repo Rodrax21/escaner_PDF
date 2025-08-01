@@ -5,14 +5,15 @@ import os
 #import re
 from datetime import datetime
 from PyPDF2 import PdfReader, PdfWriter
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QFileDialog
 
 class WorkerBusqueda(QObject):
     volverSignal = pyqtSignal()
     terminado = pyqtSignal(object)  # Signal to emit results
 
-    def __init__(self, archivos_pdf, palabras_clave):
+    def __init__(self, archivos_pdf, palabras_clave, main_window):
         print("Inicializando WorkerBusqueda")
+        self.main_window = main_window
 
         super().__init__()
         self.archivos_pdf = archivos_pdf
@@ -67,10 +68,22 @@ class WorkerBusqueda(QObject):
         if not self.resultados:
             QMessageBox.warning(None, "Sin resultados", "No hay resultados para exportar.")
             return
+        
+        print("Iniciando exportación de resultados...")
+        ruta_base = os.path.join(os.path.expanduser("~"), "Documents", "Extraccion del Escaner PDF")
+        os.makedirs(ruta_base, exist_ok=True)
 
+        print("Ruta base para exportación:", ruta_base)
+        folder_path = QFileDialog.getExistingDirectory(self.main_window,
+                                                       "Seleccionar Carpeta para Guardar los Archivos del Programa",
+                                                       ruta_base) # Inicia en el directorio del usuario
+
+        if not folder_path:
+            return  # El usuario canceló la selección
+        
         # Obtener fecha y hora para la carpeta principal
         timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-        base_dir = os.path.join(os.path.expanduser("~"), "Documents", "Extraccion del Escaner PDF", timestamp)
+        base_dir = os.path.join(folder_path, timestamp)
         
         final_dir = base_dir
         counter = 1

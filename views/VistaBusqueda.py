@@ -222,7 +222,7 @@ class VistaBusqueda(QWidget):
 
         # Crear el hilo y el worker
         self.thread = QThread()
-        self.worker = WorkerBusqueda(self.rutas_pdf, self.input_palabras.obtener_tags())
+        self.worker = WorkerBusqueda(self.rutas_pdf, self.input_palabras.obtener_tags(),self.main_window)
 
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
