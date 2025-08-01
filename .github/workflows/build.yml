@@ -12,11 +12,11 @@ jobs:
     steps:
       # Descarga tu código desde GitHub
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Instala la versión de Python necesaria
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12.4'  # O la que uses localmente
 
@@ -40,9 +40,17 @@ jobs:
         run: |
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "script_instalacion.iss"
 
-      # Sube el archivo instalador generado a GitHub Actions como artefacto descargable
-      - name: Upload artifact (installer)
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release and Upload Installer
+        uses: softprops/action-gh-release@v2
         with:
-          name: PDF-Scanner-Installer
-          path: Output/*.exe  # Asegurate de que tu .iss guarda el .exe ahí
+          tag_name: v1.0.${{ github.run_number }}
+          name: "PDF Scanner v1.0.${{ github.run_number }} - Build del ${{ github.event.head_commit.timestamp }}"
+          body: |
+            Instalador automático generado con GitHub Actions.
+            - Compilación basada en la rama `main`.
+            - Incluye el instalador `.exe` empaquetado con Inno Setup.
+          draft: false
+          prerelease: false
+          files: Output/*.exe # Asegúrate de que esta sea la ruta correcta de tu instalador
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
