@@ -1,0 +1,12 @@
+Transcripción del audio: Quiero un programa que aparezca "Inserte palabras aqui a buscar" y ahi uno pone todas las palabras separadas por comas. Despues mas abajo diga "Inserte aqui los pdf's" y uno ingresa uno o mas pdf's a buscar. Ej: Yo busco la palabra mastitis y que me aparezca que se encontro mastitis en la pagina 6 y 7 de este pdf, pag. 4 y 8 de este otro pdf y asi. Despues de que me muestre esos resultados quiero que me aparezca la opcion para extraer esas paginas a una carpeta nueva que se crea con el nombre de la palabra buscada.
+
+Preguntas a realizarle: (Ya se le realizo la primera tanda de preguntas)
+
+Requisitos de usuario:
+
+Todo el programa tiene que ser por interfaz grafica (nada de comandos o de consola)
+Ingresar por teclado las palabras (separadas por comas) a buscar en los pdf's
+Se ingrese los pdf's de forma manual (No hace falta guardar, solo se leeran una vez) adonde se realizará la busqueda, despues de eso se habilita la opcion de "Realizar busqueda".
+Para cada pdf ingresado se busque cada palabra puesta en el buscador de forma EXACTA, despues en los resultados se indique para cada pdf el numero de hojas (no la cantidad de hojas, el numero) donde se encontro cada una de las palabras.
+Del resultado optenido tiene que haber una opcion para extraer esas paginas (en forma de pdf) a una nueva carpeta con el nombre de la palabra buscada (una carpeta por palabra)
+Para mantener un orden al momento de realizar la extracción voy a crear una carpeta interna del programa que se llamara "busquedas_realizadas", adonde adentro de ella se almacenaran carpetas con la fecha y hora cuando se hizo la busqueda y adentro de esas carpetas estara lo que vos especificaste (carpetas con el nombre de las palabras buscadas donde en ellas este los pdf's extraidos).
