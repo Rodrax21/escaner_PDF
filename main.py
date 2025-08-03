@@ -12,7 +12,7 @@ from logic import AutoUpdater
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Buscador de Palabras en PDF")
+        self.setWindowTitle(f"Buscador de Palabras en PDF - {AutoUpdater.__version__}")
         self.setFixedSize(700, 500)
 
         # Stacked widget para cambiar de vistas

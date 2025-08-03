@@ -38,6 +38,10 @@ jobs:
           $replacementString = "__version__ = `"$newVersion`""
           (Get-Content logic/AutoUpdater.py) -replace '__version__ = ".*"', $replacementString | Set-Content logic/AutoUpdater.py
 
+          $pattern = 'AppVersion=.*'
+          $replacement = "AppVersion=$newVersion"
+          (Get-Content script_instalacion.iss) -replace $pattern, $replacement | Set-Content script_instalacion.iss
+
       # Ejecuta PyInstaller con tu archivo .spec
       - name: Run PyInstaller
         run: |

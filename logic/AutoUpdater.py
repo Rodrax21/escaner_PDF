@@ -73,5 +73,3 @@ def comprobar_actualizaciones(parent=None):
                 ejecutar_instalador_y_salir(ruta)
             else:
                 QMessageBox.critical(parent, "Error", "No se pudo descargar el instalador.")
-    else:
-        QMessageBox.information(parent, "Actualización", "Ya tenés la última versión.")
