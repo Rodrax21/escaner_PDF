@@ -7,6 +7,7 @@ from views.VistaBusqueda import VistaBusqueda
 from views.VistaResultados import VistaResultados
 
 from resources import recursos
+from logic import AutoUpdater
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -63,6 +64,7 @@ if __name__ == '__main__':
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u"mi_aplicacion.unica.id")
 
     ventana = MainWindow()
-    ventana.show()
     ventana.centrar_ventana()
+    ventana.show()
+    AutoUpdater.comprobar_actualizaciones(parent=ventana)
     sys.exit(app.exec_())
