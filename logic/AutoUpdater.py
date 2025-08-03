@@ -8,7 +8,7 @@ import subprocess
 from PyQt5.QtWidgets import QMessageBox
 
 # Versión actual del programa
-__version__ = "v1.0.1"  # Se actualizará automáticamente en el flujo de trabajo de GitHub
+__version__ = "v1.0.2"  # Se actualizará automáticamente en el flujo de trabajo de GitHub
 
 GITHUB_USER = "Rodrax21"
 GITHUB_REPO = "escaner_PDF"

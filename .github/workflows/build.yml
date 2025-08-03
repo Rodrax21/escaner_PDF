@@ -34,8 +34,9 @@ jobs:
       - name: Actualizar __version__ automáticamente
         shell: pwsh
         run: |
-          $version = "v1.0.${{ github.run_number }}"
-          (Get-Content logic/AutoUpdater.py) -replace '__version__ = ".*"', "__version__ = `$version`" | Set-Content logic/AutoUpdater.py
+          $newVersion = "v1.0.${{ github.run_number }}"
+          $replacementString = "__version__ = `"$newVersion`""
+          (Get-Content logic/AutoUpdater.py) -replace '__version__ = ".*"', $replacementString | Set-Content logic/AutoUpdater.py
 
       # Ejecuta PyInstaller con tu archivo .spec
       - name: Run PyInstaller
