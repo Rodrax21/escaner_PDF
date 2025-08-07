@@ -7,6 +7,8 @@ from PyQt5.QtCore import QObject
 from widgets.FlowLayout import FlowLayout
 from PyQt5.QtCore import pyqtSignal
 
+from logic.Translator import get_translation as T
+
 class TagInput(QWidget):
     def __init__(self):
         super().__init__()
@@ -19,7 +21,7 @@ class TagInput(QWidget):
 
         # Entrada superior (donde se escribe)
         self.input = QLineEdit()
-        self.input.setPlaceholderText("Escribí palabras y presioná coma o Enter")
+        self.input.setPlaceholderText(T("TI_text"))
         self.input.returnPressed.connect(self.convertir_a_tag)
         self.input.textChanged.connect(self.chequear_coma)
 
@@ -151,3 +153,7 @@ class TagInput(QWidget):
 
     def obtener_tags(self):
         return self.tags
+
+    def set_language(self):
+        self.input.setPlaceholderText(T("TI_text"))
+        self.emisor.tags_cambiaron.emit()

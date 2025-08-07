@@ -26,8 +26,8 @@ Name: "desktopicon"; Description: "Crear acceso directo en el escritorio"; Group
 Source: "dist\PDF Scanner v1\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\PDF Scanner"; Filename: "{app}\PDF Scanner v1.exe"; IconFilename: "{app}\Antodrogas.ico"
-Name: "{commondesktop}\PDF Scanner"; Filename: "{app}\PDF Scanner v1.exe"; Tasks: desktopicon; IconFilename: "{app}\Antodrogas.ico"
+Name: "{group}\PDF Scanner"; Filename: "{app}\PDF Scanner v1.exe"; 
+Name: "{commondesktop}\PDF Scanner"; Filename: "{app}\PDF Scanner v1.exe"; Tasks: desktopicon; 
 
 [Run]
 Filename: "{app}\PDF Scanner v1.exe"; Description: "Ejecutar PDF Scanner"; Flags: nowait postinstall skipifsilent

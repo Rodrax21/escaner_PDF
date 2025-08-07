@@ -5,6 +5,7 @@ from collections import defaultdict
 import os
 
 from resources import recursos  # Asegúrate de que este recurso esté definido en tu archivo .qrc
+from logic.Translator import get_translation as T
 
 class VistaResultados(QWidget):
     volverSignal = pyqtSignal()  # Señal para volver a la vista anterior
@@ -20,7 +21,7 @@ class VistaResultados(QWidget):
     def init_ui(self):
         self.layout_principal = QVBoxLayout(self)
 
-        self.titulo = QLabel("Resultados de la Búsqueda")
+        self.titulo = QLabel(T("VR_title"))
         self.titulo.setObjectName("Titulo")
         self.titulo.setAlignment(Qt.AlignCenter)
         #self.titulo.setFont(QFont("Arial", 18, QFont.Bold))
@@ -86,11 +87,11 @@ class VistaResultados(QWidget):
         """)
         self.layout_principal.addWidget(self.scroll_area)
 
-        self.boton_volver = QPushButton("Volver")
+        self.boton_volver = QPushButton(T("VR_back_button"))
         self.boton_volver.setObjectName("boton_vista")
         self.boton_volver.clicked.connect(self.volverSignal.emit)
 
-        self.boton_exportar = QPushButton("Exportar Resultados")
+        self.boton_exportar = QPushButton(T("VR_export_button"))
         self.boton_exportar.setObjectName("boton_vista")
         self.boton_exportar.clicked.connect(self.exportarSignal.emit)
 
@@ -182,14 +183,24 @@ class VistaResultados(QWidget):
 
             fila_layout.addLayout(cabecera_layout)
 
-            # Listar resultados
-            for palabra, lista_paginas in palabras_por_pagina.items():
-                paginas_ordenadas = sorted(set(lista_paginas))
-                texto = f'– "{palabra}" en pág. {", ".join(map(str, paginas_ordenadas))}'
-                fila_layout.addWidget(QLabel(texto))
+            if not palabras_por_pagina:
+                # Si no hay resultados, mostrar mensaje
+                fila_layout.addWidget(QLabel(T("VR_no_results")))
+            else:
+                # Listar resultados
+                for palabra, lista_paginas in palabras_por_pagina.items():
+                    paginas_ordenadas = sorted(set(lista_paginas))
+                    texto = f'– "{palabra}"{T("VR_conc")}{", ".join(map(str, paginas_ordenadas))}'
+                    fila_layout.addWidget(QLabel(texto))
 
             # Agregar esta fila al contenedor principal
             self.contenedor_layout.addWidget(fila_contenedor)
 
         self.contenedor.update()
+        
+    def set_language(self):
+        """Actualiza el idioma de la vista."""
+        self.titulo.setText(T("VR_title"))
+        self.boton_volver.setText(T("VR_back_button"))
+        self.boton_exportar.setText(T("VR_export_button"))
         

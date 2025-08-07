@@ -10,6 +10,7 @@ from widgets.TagInput import TagInput
 from widgets.EtiquetaPDF import EtiquetaPDF
 from logic.WorkerBusqueda import WorkerBusqueda
 from views.VistaCarga import VistaCarga
+from logic.Translator import get_translation as T
 
 class VistaBusqueda(QWidget):
     def __init__(self, main_window):
@@ -65,7 +66,7 @@ class VistaBusqueda(QWidget):
         layout_principal = QVBoxLayout()
 
         # --- TÍTULO ---
-        self.titulo = QLabel("Buscador de Palabras Clave en PDF")
+        self.titulo = QLabel(T("VB_title"))
         self.titulo.setObjectName("Titulo")
         self.titulo.setAlignment(Qt.AlignCenter)
         #self.titulo.setFont(QFont("Arial", 18, QFont.Bold))
@@ -76,18 +77,18 @@ class VistaBusqueda(QWidget):
         layout_principal.addWidget(self.input_palabras)
 
         # --- texto de pdf seleccionados ---
-        self.label_pdf = QLabel("PDf's seleccionados:")
+        self.label_pdf = QLabel(T("VB_selected_files"))
         self.label_pdf.setAlignment(Qt.AlignLeft)
         self.label_pdf.setObjectName("label_pdf")
         layout_principal.addWidget(self.label_pdf)
 
         # --- Selección de PDFs ---
-        self.boton_pdf = QPushButton("Seleccionar archivos PDF")
+        self.boton_pdf = QPushButton(T("VB_select_files"))
         self.boton_pdf.setObjectName("boton_vista")
         self.boton_pdf.clicked.connect(self.abrir_dialogo_pdf)
 
         # --- Botón continuar ---
-        self.boton_continuar = QPushButton("Comenzar búsqueda")
+        self.boton_continuar = QPushButton(T("VB_search_button"))
         self.boton_continuar.setObjectName("boton_vista")
         self.boton_continuar.clicked.connect(self.iniciar_busqueda)
 
@@ -175,7 +176,7 @@ class VistaBusqueda(QWidget):
         ruta_base = os.path.join(os.path.expanduser("~"), "Documents")
         os.makedirs(ruta_base, exist_ok=True)
         archivos, _ = QFileDialog.getOpenFileNames(
-            self, "Seleccionar archivos PDF", ruta_base, "Archivos PDF (*.pdf)"
+            self, T("VB_select_files"), ruta_base, "Archivos PDF (*.pdf)"
         )
         if archivos:
             self.agregar_pdfs(archivos)
@@ -252,3 +253,12 @@ class VistaBusqueda(QWidget):
 
     def exportar(self):
         self.worker.exportar_resultados()
+
+    def set_language(self):
+        self.titulo.setText(T("VB_title"))
+        self.input_palabras.set_language()
+        self.label_pdf.setText(T("VB_selected_files"))
+        self.boton_pdf.setText(T("VB_select_files"))
+        self.boton_continuar.setText(T("VB_search_button"))
+
+    

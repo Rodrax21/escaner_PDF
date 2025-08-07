@@ -6,6 +6,7 @@ import sys
 import tempfile
 import subprocess
 from PyQt5.QtWidgets import QMessageBox
+from logic.Translator import get_translation as T
 
 # Versión actual del programa
 __version__ = "v1.0.2"  # Se actualizará automáticamente en el flujo de trabajo de GitHub
@@ -21,7 +22,7 @@ def obtener_ultima_version():
         data = response.json()
         return data["tag_name"], data["assets"]
     except Exception as e:
-        QMessageBox.critical(None, f"Error al intentar actualizar el programa", f"No se pudo comprobar la ultima versión:\n{str(e)}")
+        QMessageBox.critical(None, T("AU_critical_1a"), f"{T("AU_critical_1b")}\n{str(e)}")
         print(f"Error al consultar actualizaciones: {e}")
         return None, None
 
@@ -57,14 +58,14 @@ def ejecutar_instalador_y_salir(instalador_path):
 def comprobar_actualizaciones(parent=None):
     ultima_version, assets = obtener_ultima_version()
     if ultima_version is None or assets is None:
-        QMessageBox.warning(parent, "Actualización", "No se pudo comprobar si hay una nueva versión.")
+        QMessageBox.warning(parent, T("AU_warning_a"), T("AU_warning_b"))
         return
 
     if ultima_version != __version__:
         respuesta = QMessageBox.question(
             parent,
-            "Actualización disponible",
-            f"Hay una nueva versión disponible ({ultima_version}). ¿Deseás descargarla ahora?",
+            T("AU_question_a"),
+            f"{T("AU_question_b")} ({ultima_version}). {T("AU_question_c")}",
             QMessageBox.Yes | QMessageBox.No
         )
         if respuesta == QMessageBox.Yes:
@@ -72,4 +73,4 @@ def comprobar_actualizaciones(parent=None):
             if ruta:
                 ejecutar_instalador_y_salir(ruta)
             else:
-                QMessageBox.critical(parent, "Error", "No se pudo descargar el instalador.")
+                QMessageBox.critical(parent, "Error", T("AU_critical_2a"))

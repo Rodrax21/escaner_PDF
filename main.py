@@ -3,16 +3,19 @@ import ctypes
 import os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget
 from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt
 from views.VistaBusqueda import VistaBusqueda
 from views.VistaResultados import VistaResultados
 
 from resources import recursos
 from logic import AutoUpdater
+from logic.Translator import get_translation as T
+from logic.Translator import cycle_language
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(f"Buscador de Palabras en PDF - {AutoUpdater.__version__}")
+        self.setWindowTitle(f"{T("main_title")} - {AutoUpdater.__version__}")
         self.setFixedSize(700, 500)
 
         # Stacked widget para cambiar de vistas
@@ -54,6 +57,14 @@ class MainWindow(QMainWindow):
         x = screen_geometry.center().x() - self.width() // 2
         y = screen_geometry.center().y() - self.height() // 2
         self.move(x, y)
+
+    def keyPressEvent(self, event):
+        if event.modifiers() & Qt.ControlModifier and event.key() == Qt.Key_I:  # Tecla 'i'
+            nuevo_idioma = cycle_language()
+            print(f"Idioma cambiado a: {nuevo_idioma}")
+            self.vista_1.set_language()
+            self.vista_2.set_language()
+            self.setWindowTitle(f"{T("main_title")} - {AutoUpdater.__version__}")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

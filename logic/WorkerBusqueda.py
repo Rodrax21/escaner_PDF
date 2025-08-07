@@ -2,10 +2,10 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from pathlib import Path
 import fitz  # PyMuPDF
 import os
-#import re
 from datetime import datetime
 from PyPDF2 import PdfReader, PdfWriter
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
+from logic.Translator import get_translation as T
 
 class WorkerBusqueda(QObject):
     volverSignal = pyqtSignal()
@@ -56,7 +56,7 @@ class WorkerBusqueda(QObject):
                 doc.close()
 
             except Exception as e:
-                QMessageBox.critical(self, "Error al cargar", f"No se pudo cargar el pdf:\n{str(e)}")
+                QMessageBox.critical(self, "Error", f"{T("WB_critical_1")}\n{str(e)}")
 
 
         return resultados
@@ -66,16 +66,16 @@ class WorkerBusqueda(QObject):
     
     def exportar_resultados(self):
         if not self.resultados:
-            QMessageBox.warning(None, "Sin resultados", "No hay resultados para exportar.")
+            QMessageBox.warning(None, T("WB_warning_1a"), T("WB_warning_1b"))
             return
         
         print("Iniciando exportación de resultados...")
-        ruta_base = os.path.join(os.path.expanduser("~"), "Documents", "Extraccion del Escaner PDF")
+        ruta_base = os.path.join(os.path.expanduser("~"), "Documents", "PDF Scanner", "extracciones")
         os.makedirs(ruta_base, exist_ok=True)
 
         print("Ruta base para exportación:", ruta_base)
         folder_path = QFileDialog.getExistingDirectory(self.main_window,
-                                                       "Seleccionar Carpeta para Guardar los Archivos del Programa",
+                                                       T("WB_search"),
                                                        ruta_base) # Inicia en el directorio del usuario
 
         if not folder_path:
@@ -142,8 +142,8 @@ class WorkerBusqueda(QObject):
                     QMessageBox.critical(self, f"Error al exportar {final_dir} para palabra '{palabra}'", f"No se pudo exportar el pdf:\n{str(e)}")
 
         # Mostrar mensaje de finalización
-        QMessageBox.information(None, "Exportación completada",
-                                f"Los resultados fueron exportados correctamente a:\n\n{final_dir}")
+        QMessageBox.information(None, T("WB_success_1"),
+                                f"{T("WB_success_2")}\n\n{final_dir}")
 
         # Volver a la pantalla inicial (VistaBusqueda)
         self.volverSignal.emit()

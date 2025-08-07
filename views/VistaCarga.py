@@ -4,6 +4,7 @@ from PyQt5.QtGui import QMovie
 from PyQt5.QtCore import Qt
 
 from resources import recursos  # Asegúrate de que este recurso esté definido en tu archivo .qrc
+from logic.Translator import get_translation as T
 
 class VistaCarga(QDialog):
     def __init__(self, parent=None):
@@ -12,7 +13,7 @@ class VistaCarga(QDialog):
         self.setModal(True)
         self.resize(300, 200)
 
-        self.setWindowTitle("Procesando...")
+        self.setWindowTitle(T("VC_title"))
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
         self.setAttribute(Qt.WA_TranslucentBackground)
