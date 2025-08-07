@@ -150,6 +150,7 @@ class VistaResultados(QWidget):
                 widget.setParent(None)
 
         self.resultados = resultados
+        self.labels_traducibles = []
 
         for ruta_pdf, paginas in resultados.items():
             nombre_archivo = os.path.basename(ruta_pdf)

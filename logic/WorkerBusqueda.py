@@ -11,9 +11,12 @@ class WorkerBusqueda(QObject):
     volverSignal = pyqtSignal()
     terminado = pyqtSignal(object)  # Signal to emit results
 
-    def __init__(self, archivos_pdf, palabras_clave, main_window):
+    def __init__(self, archivos_pdf, palabras_clave, main_window, apellido_paciente, nombre_paciente):
         print("Inicializando WorkerBusqueda")
         self.main_window = main_window
+
+        self.apellido_paciente = apellido_paciente
+        self.nombre_paciente = nombre_paciente
 
         super().__init__()
         self.archivos_pdf = archivos_pdf
@@ -82,8 +85,8 @@ class WorkerBusqueda(QObject):
             return  # El usuario canceló la selección
         
         # Obtener fecha y hora para la carpeta principal
-        timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-        base_dir = os.path.join(folder_path, timestamp)
+        nombre_carpeta = f"{self.apellido_paciente}, {self.nombre_paciente}"
+        base_dir = os.path.join(folder_path, nombre_carpeta)
         
         final_dir = base_dir
         counter = 1

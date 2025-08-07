@@ -15,12 +15,13 @@ SetupIconFile=resources\Antodrogas.ico
 DisableDirPage=no
 DisableProgramGroupPage=yes
 ShowLanguageDialog=yes
+WizardStyle=modern
 
 [Languages]
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "Crear acceso directo en el escritorio"; GroupDescription: "Tareas adicionales"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
 Source: "dist\PDF Scanner v1\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -41,12 +42,12 @@ begin
   if CurUninstallStep = usUninstall then
   begin
     // Preguntar al usuario si desea eliminar la carpeta
-    UserChoice := MsgBox('¿Desea eliminar también los datos generados en la carpeta "Documentos\Extraccion del Escaner PDF"?',
+    UserChoice := MsgBox('¿Desea eliminar también los datos generados en la carpeta "Documentos\PDF Scanner"?',
                          mbConfirmation, MB_YESNO or MB_DEFBUTTON2);
 
     if UserChoice = IDYES then
     begin
-      DataPath := ExpandConstant('{userdocs}\Extraccion del Escaner PDF');
+      DataPath := ExpandConstant('{userdocs}\PDF Scanner');
       DelTree(DataPath, True, True, True);
     end;
   end
