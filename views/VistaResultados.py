@@ -15,6 +15,7 @@ class VistaResultados(QWidget):
         super().__init__()
         self.main_window = main_window
         self.resultados = {}
+        self.labels_traducibles = []
 
         self.init_ui()
 
@@ -185,13 +186,19 @@ class VistaResultados(QWidget):
 
             if not palabras_por_pagina:
                 # Si no hay resultados, mostrar mensaje
-                fila_layout.addWidget(QLabel(T("VR_no_results")))
+                label = QLabel(T("VR_no_results"))
+                self.labels_traducibles.append((label, "VR_no_results"))
+                fila_layout.addWidget(label)
+
             else:
                 # Listar resultados
                 for palabra, lista_paginas in palabras_por_pagina.items():
                     paginas_ordenadas = sorted(set(lista_paginas))
                     texto = f'– "{palabra}"{T("VR_conc")}{", ".join(map(str, paginas_ordenadas))}'
-                    fila_layout.addWidget(QLabel(texto))
+                    label = QLabel(texto)
+                    label.datos = (palabra, paginas_ordenadas)
+                    self.labels_traducibles.append((label, "VR_conc"))
+                    fila_layout.addWidget(label)
 
             # Agregar esta fila al contenedor principal
             self.contenedor_layout.addWidget(fila_contenedor)
@@ -203,4 +210,11 @@ class VistaResultados(QWidget):
         self.titulo.setText(T("VR_title"))
         self.boton_volver.setText(T("VR_back_button"))
         self.boton_exportar.setText(T("VR_export_button"))
+        for label, clave in self.labels_traducibles:
+            if clave == "VR_no_results":
+                label.setText(T(clave))
+            elif clave == "VR_conc":
+                palabra, paginas = label.datos
+                label.setText(f'– "{palabra}"{T("VR_conc")}{", ".join(map(str, paginas))}')
+        
         
