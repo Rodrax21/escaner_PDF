@@ -67,8 +67,8 @@ class VistaBusqueda(QWidget):
             }               
         """)
 
-        # Crear validador para nombres válidos de carpetas (letras, números, guiones y espacios)
-        regex = QRegExp("[A-Za-zÁÉÍÓÚÑáéíóúñ ]+")
+        # Crear validador para nombres válidos
+        regex = QRegExp(r'^[^0-9¡!"#$%&/()=+{}\[\];~`^¬°|:<>\?*_,\.\-¿:]+$')
         validador_nombre = QRegExpValidator(regex, self)
 
         # Layout principal

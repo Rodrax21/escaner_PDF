@@ -93,7 +93,7 @@ class WorkerBusqueda(QObject):
 
         # Bucle para verificar existencia y agregar sufijo incremental
         while os.path.exists(final_dir):
-            final_dir = base_dir + f"_{counter}"
+            final_dir = base_dir + f" ({counter})"
             counter += 1
 
         # Crear la carpeta final
@@ -130,7 +130,7 @@ class WorkerBusqueda(QObject):
 
                     # Preparar rutas
                     nombre_archivo = os.path.basename(ruta_pdf)
-                    nombre_salida = f"Hojas de {nombre_archivo}"
+                    nombre_salida = f"{T("WB_pages_of")} {nombre_archivo}"
                     carpeta_salida = os.path.join(final_dir, palabra)
                     os.makedirs(carpeta_salida, exist_ok=True)
 
