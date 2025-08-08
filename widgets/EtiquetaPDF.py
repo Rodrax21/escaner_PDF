@@ -20,7 +20,10 @@ class EtiquetaPDF(QWidget):
 
         # Icono PDF
         icon_label = QLabel()
-        icon_pixmap = QPixmap(":/logo_pdf.png")  # Cambiar a la ruta real del ícono
+        if self.pdf_path.suffix.lower() == ".docx":
+            icon_pixmap = QPixmap(":/logo_doc.png")  # Ruta del ícono para Word
+        else:
+            icon_pixmap = QPixmap(":/logo_pdf.png")   # Ruta del ícono para PDF
         icon_label.setPixmap(icon_pixmap.scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         layout.addWidget(icon_label)
 

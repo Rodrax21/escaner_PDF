@@ -1,6 +1,8 @@
 import sys
 import ctypes
 import os
+import tempfile
+import shutil
 from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
@@ -66,6 +68,20 @@ class MainWindow(QMainWindow):
             self.vista_2.set_language()
             self.setWindowTitle(f"{T("main_title")} - {AutoUpdater.__version__}")
 
+    def limpiar_temporales_antiguos(self):
+        temp_root = os.path.join(tempfile.gettempdir(), "scanner_pdf_temp")
+        os.makedirs(temp_root, exist_ok=True)  # Asegura que exista
+
+        for nombre in os.listdir(temp_root):
+            path = os.path.join(temp_root, nombre)
+            try:
+                if os.path.isfile(path):
+                    os.remove(path)
+                elif os.path.isdir(path):
+                    shutil.rmtree(path)
+            except Exception as e:
+                print(f"No se pudo borrar {path}: {e}")
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(":/Antodrogas.ico"))
@@ -77,5 +93,6 @@ if __name__ == '__main__':
     ventana = MainWindow()
     ventana.centrar_ventana()
     ventana.show()
+    ventana.limpiar_temporales_antiguos()
     AutoUpdater.comprobar_actualizaciones(parent=ventana)
     sys.exit(app.exec_())

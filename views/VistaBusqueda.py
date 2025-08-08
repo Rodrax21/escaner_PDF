@@ -19,7 +19,7 @@ class VistaBusqueda(QWidget):
         super().__init__()
         self.main_window = main_window
 
-        self.rutas_pdf = set()  # Usar un set para evitar duplicados
+        self.rutas_archivos = set()  # Usar un set para evitar duplicados
         class Emisor(QObject):
             archivos_cambiaron = pyqtSignal()
 
@@ -210,13 +210,18 @@ class VistaBusqueda(QWidget):
         ruta_base = os.path.join(os.path.expanduser("~"), "Documents")
         ruta = QFileDialog.getExistingDirectory(self, T("VB_select_folder"), ruta_base)
         if ruta:
-            self.agregar_pdfs(list(Path(ruta).glob("*.pdf")))
+            extensiones_permitidas = {".pdf", ".docx"}
+            archivos = [
+                archivo for archivo in Path(ruta).iterdir()
+                if archivo.suffix.lower() in extensiones_permitidas and archivo.is_file()
+            ]
+            self.agregar_pdfs(archivos)
 
     def abrir_dialogo_pdf(self):
         ruta_base = os.path.join(os.path.expanduser("~"), "Documents")
         os.makedirs(ruta_base, exist_ok=True)
         archivos, _ = QFileDialog.getOpenFileNames(
-            self, T("VB_select_files"), ruta_base, "Archivos PDF (*.pdf)"
+            self, T("VB_select_files"), ruta_base, "Documentos (*.pdf *.docx)"
         )
         if archivos:
             self.agregar_pdfs(archivos)
@@ -224,18 +229,22 @@ class VistaBusqueda(QWidget):
     def agregar_pdfs(self, rutas):
         for ruta_str in rutas:
             ruta = Path(ruta_str).resolve()
-            if ruta not in self.rutas_pdf:
-                self.rutas_pdf.add(ruta)
+
+            if ruta.suffix.lower() not in [".pdf", ".docx"]:
+                continue  # Ignorar tipos no soportados
+
+            if ruta not in self.rutas_archivos:
+                self.rutas_archivos.add(ruta)
                 etiqueta = EtiquetaPDF(ruta, self.remover_pdf)
                 self.lista_pdf_layout.addWidget(etiqueta)
         self.emisor.archivos_cambiaron.emit()
 
     def remover_pdf(self, item):
         ruta_str = item.pdf_path.resolve()
-        if ruta_str in self.rutas_pdf:
+        if ruta_str in self.rutas_archivos:
             self.lista_pdf_layout.removeWidget(item)
             item.deleteLater()
-            self.rutas_pdf.remove(ruta_str)
+            self.rutas_archivos.remove(ruta_str)
             self.emisor.archivos_cambiaron.emit()
             # El widget ya se elimina con .setParent(None) desde EtiquetaPDF
 
@@ -261,11 +270,11 @@ class VistaBusqueda(QWidget):
         palabras = self.input_palabras.obtener_tags()
         palabras_clave = [p.strip() for p in palabras if p.strip()]
         print(f"Palabras clave: {palabras_clave}")
-        print(f"Archivos PDF seleccionados: {[str(r) for r in self.rutas_pdf]}")
+        print(f"Archivos PDF seleccionados: {[str(r) for r in self.rutas_archivos]}")
 
     def actualizar_estado_boton_buscar(self):
         hay_palabras = self.input_palabras.obtener_tags() != []
-        hay_pdfs = self.rutas_pdf.__len__() > 0
+        hay_pdfs = self.rutas_archivos.__len__() > 0
         hay_apellido = self.input_apellido.text() != ""
         hay_nombre = self.input_nombre.text() != ""
 
@@ -300,7 +309,7 @@ class VistaBusqueda(QWidget):
 
         # Crear el hilo y el worker
         self.thread = QThread()
-        self.worker = WorkerBusqueda(self.rutas_pdf, self.input_palabras.obtener_tags(),self.main_window,self.apellido_paciente,self.nombre_paciente)
+        self.worker = WorkerBusqueda(self.rutas_archivos, self.input_palabras.obtener_tags(),self.main_window,self.apellido_paciente,self.nombre_paciente)
 
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)

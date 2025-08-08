@@ -2,6 +2,7 @@
   <qresource prefix="/">
     <file>Antodrogas.ico</file>
     <file>logo_pdf.png</file>
+    <file>logo_doc.png</file>
     <file>loading.gif</file>
   </qresource>
 </RCC>

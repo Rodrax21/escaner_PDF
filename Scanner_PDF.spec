@@ -11,6 +11,8 @@ a = Analysis(
         'PyQt5.QtWidgets',
         'fitz',
         'PyPDF2',
+        'pdf2docx',
+        'docx2pdf',
         'email',
         'http',
         'xml',

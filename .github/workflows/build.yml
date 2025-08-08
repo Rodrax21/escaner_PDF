@@ -7,6 +7,7 @@ on:
     paths: # Solo ejecuta el workflow si hay cambios en estos paths:
       - '**/*.py'         # Si tus archivos Python están en la raíz o subcarpetas
       - 'resourses/**'  # Si tus recursos están en una carpeta llamada 'resources'
+      - 'translations/**'  # Si tus recursos están en una carpeta llamada 'resources'
       - '*.spec'         # Si usás un archivo .spec de PyInstaller
       - '*.iss'
 
@@ -29,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller pymupdf PyPDF2 PyQt5 requests
+          pip install pyinstaller pymupdf PyPDF2 PyQt5 requests docx2pdf pdf2docx
 
       - name: Actualizar __version__ automáticamente
         shell: pwsh
