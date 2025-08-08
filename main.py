@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle(f"{T("main_title")} - {AutoUpdater.__version__}")
-        self.setFixedSize(700, 500)
+        self.setFixedSize(750, 500)
 
         # Stacked widget para cambiar de vistas
         self.stack = QStackedWidget()

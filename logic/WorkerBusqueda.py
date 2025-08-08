@@ -31,8 +31,6 @@ class WorkerBusqueda(QObject):
         self.terminado.emit(self.resultados)
 
     def convertir_word_a_pdf(self, ruta_docx):
-        if not ruta_docx.lower().endswith(".docx"):
-            raise ValueError("El archivo no es .docx")
 
         # Crear carpeta temporal fija de la app
         temp_dir = os.path.join(tempfile.gettempdir(), "scanner_pdf_temp")
@@ -43,7 +41,12 @@ class WorkerBusqueda(QObject):
 
         # Convertir solo si no existe (opcional: evita sobrescribir)
         if not os.path.exists(ruta_pdf):
-            convert(ruta_docx, ruta_pdf)
+            try:
+                print(f"Convirtiendo {ruta_docx} a PDF...")
+                convert(ruta_docx, ruta_pdf)
+                print(f"PDF convertido: {ruta_pdf}")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"{T("WB_critical_docs")}\n{str(e)}")
 
         if not os.path.exists(ruta_pdf):
             raise FileNotFoundError("Error al convertir el .docx a PDF")
@@ -51,22 +54,31 @@ class WorkerBusqueda(QObject):
         return ruta_pdf
 
     def buscar_palabras_en_pdfs(self):
+
+        print("Iniciando búsqueda de palabras clave en PDFs/DOCS")
         resultados = {}
 
         for ruta_original in self.archivos_pdf:
             try:
-                if ruta_original.lower().endswith(".docx"):
+                print(f"Procesando archivo: {ruta_original}")
+                
+                ruta = Path(ruta_original).resolve()
+                if ruta.suffix.lower() == ".docx":
+                    print(f"Convirtiendo {ruta} a PDF...")
                     ruta_pdf = self.convertir_word_a_pdf(ruta_original)
                 else:
                     ruta_pdf = ruta_original
 
+                print(f"Ruta PDF procesada: {ruta_pdf}")
                 ruta_pdf = Path(ruta_pdf)
+
+                print(f"Ruta PDF final: {ruta_pdf}")
                 resultados[ruta_original] = {}
 
                 doc = fitz.open(ruta_pdf)
                 for num_pagina, pagina in enumerate(doc, start=1):
-                    texto = pagina.get_text().lower()
-                    coincidencias = [palabra for palabra in self.palabras_clave if palabra.lower() in texto]
+                    texto = pagina.get_text()
+                    coincidencias = [palabra for palabra in self.palabras_clave if palabra.lower() in texto.lower()]
                     #coincidencias = [
                     #    palabra for palabra in self.palabras_clave
                     #    if re.search(rf'\b{re.escape(palabra.lower())}\b', texto.lower())
@@ -133,8 +145,8 @@ class WorkerBusqueda(QObject):
                                 writer = PdfWriter()
                                 writer.add_page(reader.pages[num_pagina - 1])
 
-                                nombre_base = os.path.basename(ruta_pdf)
-                                nombre_salida = f"(Pag.{num_pagina})_{nombre_base}"
+                                nombre_base, extension = os.path.splitext(os.path.basename(ruta_pdf))
+                                nombre_salida = f"{nombre_base} (Pag. {num_pagina}){extension}"
                                 ruta_salida = os.path.join(carpeta_salida, nombre_salida)
 
                                 with open(ruta_salida, "wb") as f:
@@ -143,31 +155,8 @@ class WorkerBusqueda(QObject):
                                 print(f"Página {num_pagina} fuera de rango en {ruta_pdf}")
 
                     elif ext == ".docx":
-                        
-                        #self.extraer_docs_a_docs(ruta_pdf, paginas_set, carpeta_salida)    # Para exportar a DOCX
-
-                        temp_dir = os.path.join(tempfile.gettempdir(), "scanner_pdf_temp")
-                        nombre_base = os.path.splitext(os.path.basename(ruta_pdf))[0]
-                        ruta_pdf_temp = os.path.join(temp_dir, f"{nombre_base}.pdf")
-
-                        if not os.path.exists(ruta_pdf_temp):
-                            print(f"PDF temporal no encontrado para {ruta_pdf}")
-                            continue
-
-                        reader = PdfReader(ruta_pdf_temp)
-                        for num_pagina in sorted(paginas_set):
-                            if 0 < num_pagina <= len(reader.pages):
-                                writer = PdfWriter()
-                                writer.add_page(reader.pages[num_pagina - 1])
-
-                                nombre_docx = os.path.basename(ruta_pdf)
-                                nombre_salida_pdf = f"(Pag.{num_pagina})_{nombre_docx.replace('.docx', '.pdf')}"
-                                ruta_salida_pdf = os.path.join(carpeta_salida, nombre_salida_pdf)
-
-                                with open(ruta_salida_pdf, "wb") as f:
-                                    writer.write(f)
-                            else:
-                                print(f"Página {num_pagina} fuera de rango en {ruta_pdf}")
+                        self.extraer_docs_a_docs(ruta_pdf, paginas_set, carpeta_salida)    # Para exportar a DOCX
+                        #self.extraer_docs_a_pdfs(ruta_pdf, paginas_set, carpeta_salida)     # Para exportar a PDF
 
                     else:
                         print(f"Tipo de archivo no soportado: {ruta_pdf}")
@@ -182,6 +171,30 @@ class WorkerBusqueda(QObject):
                                 f"{T('WB_success_2')}\n\n{final_dir}")
         self.volverSignal.emit()
 
+    def extraer_docs_a_pdfs(self, ruta_pdf, paginas_set, carpeta_salida):
+        temp_dir = os.path.join(tempfile.gettempdir(), "scanner_pdf_temp")
+        nombre_base = os.path.splitext(os.path.basename(ruta_pdf))[0]
+        ruta_pdf_temp = os.path.join(temp_dir, f"{nombre_base}.pdf")
+
+        if not os.path.exists(ruta_pdf_temp):
+            print(f"PDF temporal no encontrado para {ruta_pdf}")
+            return
+
+        reader = PdfReader(ruta_pdf_temp)
+        for num_pagina in sorted(paginas_set):
+            if 0 < num_pagina <= len(reader.pages):
+                writer = PdfWriter()
+                writer.add_page(reader.pages[num_pagina - 1])
+
+                nombre_base, extension = os.path.splitext(os.path.basename(ruta_pdf))
+                nombre_salida_pdf = f"{nombre_base} (Pag. {num_pagina}).pdf"
+                ruta_salida_pdf = os.path.join(carpeta_salida, nombre_salida_pdf)
+
+                with open(ruta_salida_pdf, "wb") as f:
+                    writer.write(f)
+            else:
+                print(f"Página {num_pagina} fuera de rango en {ruta_pdf}")
+    
     def extraer_docs_a_docs(self, ruta_pdf, paginas_set, carpeta_salida):
         temp_dir = os.path.join(tempfile.gettempdir(), "scanner_pdf_temp")
         nombre_base = os.path.splitext(os.path.basename(ruta_pdf))[0]
@@ -207,8 +220,8 @@ class WorkerBusqueda(QObject):
                     writer.write(f)
 
                 # Convertir esa página PDF a DOCX
-                nombre_docx = os.path.basename(ruta_pdf)
-                nombre_salida_docx = f"(Pag. {num_pagina})_{nombre_docx}"
+                nombre_docx, extension = os.path.splitext(os.path.basename(ruta_pdf))
+                nombre_salida_docx = f"{nombre_docx} (Pag. {num_pagina}){extension}"
                 ruta_salida_docx = os.path.join(carpeta_salida, nombre_salida_docx)
 
                 cv = Converter(temp_pdf_page)

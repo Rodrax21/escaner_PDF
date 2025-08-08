@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QScrollAr
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import pyqtSignal, Qt
 from collections import defaultdict
+from pathlib import Path
 import os
 
 from resources import recursos  # Asegúrate de que este recurso esté definido en tu archivo .qrc
@@ -175,7 +176,12 @@ class VistaResultados(QWidget):
             # Cabecera con icono y nombre
             cabecera_layout = QHBoxLayout()
             icono_label = QLabel()
-            icono_label.setPixmap(QPixmap(":/logo_pdf.png").scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            ruta = Path(ruta_pdf).resolve()
+            if ruta.suffix.lower() == ".docx":
+                icon_pixmap = QPixmap(":/logo_doc.png")  # Ruta del ícono para Word
+            else:
+                icon_pixmap = QPixmap(":/logo_pdf.png")   # Ruta del ícono para PDF
+            icono_label.setPixmap(icon_pixmap.scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation))
             texto_label = QLabel(nombre_archivo)
             texto_label.setObjectName("pdfTitulo")
 
