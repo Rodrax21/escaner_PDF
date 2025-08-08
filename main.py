@@ -93,6 +93,6 @@ if __name__ == '__main__':
     ventana = MainWindow()
     ventana.centrar_ventana()
     ventana.show()
-    ventana.limpiar_temporales_antiguos()
+    #ventana.limpiar_temporales_antiguos()
     AutoUpdater.comprobar_actualizaciones(parent=ventana)
     sys.exit(app.exec_())
