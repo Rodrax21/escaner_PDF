@@ -97,8 +97,20 @@ class WorkerBusqueda(QObject):
     def obtener_resultados(self):
         return self.resultados
     
+    def check_for_empty_pages(self):
+        for direccion_path in self.resultados:
+            paginas_por_documento = self.resultados[direccion_path]
+            # Si el diccionario de páginas no está vacío, significa que hay páginas con resultados.
+            # En Python, un diccionario vacío {} se evalúa como False, y uno con contenido como True.
+            if paginas_por_documento:
+                return False
+                
+        # Si el bucle termina, significa que no se encontró ningún documento con páginas.
+        return True
+    
     def exportar_resultados(self):
-        if not self.resultados:
+        print(self.resultados)
+        if self.check_for_empty_pages():
             QMessageBox.warning(None, T("WB_warning_1a"), T("WB_warning_1b"))
             return
 
