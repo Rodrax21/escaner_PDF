@@ -82,7 +82,19 @@ class MainWindow(QMainWindow):
             except Exception as e:
                 print(f"No se pudo borrar {path}: {e}")
 
+def ocultar_consola():
+    if sys.platform == "win32":
+        whnd = ctypes.windll.kernel32.GetConsoleWindow()
+        if whnd:
+            # 0 = SW_HIDE (ocultar)
+            # 6 = SW_MINIMIZE (minimizar)
+            # 2 = SW_HIDE también puede usarse en ShowWindowAsync
+            ctypes.windll.user32.ShowWindow(whnd, 0)
+            # Alternativa: además llamar a ShowWindowAsync
+            ctypes.windll.user32.ShowWindowAsync(whnd, 0)
+
 if __name__ == '__main__':
+    ocultar_consola()  # Oculta la consola en Windows
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(":/Antodrogas.ico"))
 
