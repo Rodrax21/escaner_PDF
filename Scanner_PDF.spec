@@ -23,7 +23,6 @@ a = Analysis(
     excludes=[
         'tkinter',
         'unittest',
-        'numpy',
         'scipy',
         'matplotlib',
         'PyQt5.QtWebEngineWidgets',
