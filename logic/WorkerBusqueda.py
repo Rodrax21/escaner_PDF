@@ -9,9 +9,140 @@ from PyPDF2 import PdfReader, PdfWriter
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
 from logic.Translator import get_translation as T
 
+def exportar_a_pdf(ruta_pdf, paginas_set, carpeta_salida):  # Extrae páginas de un PDF a un único PDF
+    if not os.path.exists(carpeta_salida):
+        os.makedirs(carpeta_salida)
+
+    reader = PdfReader(ruta_pdf)
+    writer = PdfWriter()
+
+    for num_pagina in sorted(paginas_set):
+        if 0 < num_pagina <= len(reader.pages):
+            writer.add_page(reader.pages[num_pagina - 1])
+        else:
+            print(f"Página {num_pagina} fuera de rango en {ruta_pdf}")
+
+    nombre_base = os.path.basename(ruta_pdf)
+    nombre_salida = f"{T("WB_pages_of")} {nombre_base}"
+    ruta_salida = os.path.join(carpeta_salida, nombre_salida)
+
+    with open(ruta_salida, "wb") as f:
+        writer.write(f)
+
+def extraer_pdf_a_pdfs(ruta_pdf, paginas_set, carpeta_salida):    # Extrae páginas de un PDF a PDFs individuales
+    if not os.path.exists(carpeta_salida):
+        os.makedirs(carpeta_salida)
+    
+    reader = PdfReader(ruta_pdf)
+    for num_pagina in sorted(paginas_set):
+        if 0 < num_pagina <= len(reader.pages):
+            writer = PdfWriter()
+            writer.add_page(reader.pages[num_pagina - 1])
+
+            nombre_base, extension = os.path.splitext(os.path.basename(ruta_pdf))
+            nombre_salida = f"{nombre_base} (Pag. {num_pagina}){extension}"
+            ruta_salida = os.path.join(carpeta_salida, nombre_salida)
+
+            with open(ruta_salida, "wb") as f:
+                writer.write(f)
+        else:
+            print(f"Página {num_pagina} fuera de rango en {ruta_pdf}")
+
+def exportar_a_docx(ruta_pdf, paginas_set, carpeta_salida):    # Extrae páginas de un PDF a un único DOCX
+    if not os.path.exists(carpeta_salida):
+        os.makedirs(carpeta_salida)
+        
+    temp_dir = os.path.join(tempfile.gettempdir(), "scanner_pdf_temp")
+    nombre_base = os.path.splitext(os.path.basename(ruta_pdf))[0]
+    ruta_pdf_temp = os.path.join(temp_dir, f"{nombre_base}.pdf")
+
+    if not os.path.exists(ruta_pdf_temp):
+        print(f"PDF temporal no encontrado para {ruta_pdf}")
+        return
+
+    try:
+        # Crear un PDF temporal que solo contenga todas las paginas 
+        reader = PdfReader(ruta_pdf_temp)
+        writer = PdfWriter()
+        for num_pagina in sorted(paginas_set):
+            if 0 < num_pagina <= len(reader.pages):
+                writer.add_page(reader.pages[num_pagina - 1])
+
+        # Guardar temporalmente la página como PDF individual
+        temp_pdf_pages = os.path.join(tempfile.gettempdir(), "temp_paginas_seleccionadas.pdf")
+        with open(temp_pdf_pages, "wb") as f:
+            writer.write(f)
+
+        # Convertir esa página PDF a DOCX
+        nombre_base = os.path.splitext(os.path.basename(ruta_pdf))[0]
+        nombre_salida_docx = f"{T("WB_pages_of")} {nombre_base}.docx"
+        ruta_salida_docx = os.path.join(carpeta_salida, nombre_salida_docx)
+
+        cv = Converter(temp_pdf_pages)
+        cv.convert(ruta_salida_docx)  # Solo tiene una página
+        cv.close()
+
+        os.remove(temp_pdf_pages)
+    except Exception as e:
+        print(f"Error exportando página {num_pagina} a DOCX: {e}")
+        QMessageBox.critical(None, "Error", f"No se pudo exportar la página {num_pagina} a DOCX:\n{str(e)}")
+
+def extraer_docx_a_docx(ruta_pdf, paginas_set, carpeta_salida):   #   Extrae páginas de un docx a docx's individuales
+    if not os.path.exists(carpeta_salida):
+        os.makedirs(carpeta_salida)
+
+    temp_dir = os.path.join(tempfile.gettempdir(), "scanner_pdf_temp")
+    nombre_base = os.path.splitext(os.path.basename(ruta_pdf))[0]
+    ruta_pdf_temp = os.path.join(temp_dir, f"{nombre_base}.pdf")
+
+    if not os.path.exists(ruta_pdf_temp):
+        print(f"PDF temporal no encontrado para {ruta_pdf}")
+        return
+
+    reader = PdfReader(ruta_pdf_temp)
+    for num_pagina in sorted(paginas_set):
+        try:
+            # Crear un PDF temporal que solo contenga esa página
+            writer = PdfWriter()
+            if 0 < num_pagina <= len(reader.pages):
+                writer.add_page(reader.pages[num_pagina - 1])
+            else:
+                continue
+
+            # Guardar temporalmente la página como PDF individual
+            temp_pdf_page = os.path.join(tempfile.gettempdir(), f"temp_page_{num_pagina}.pdf")
+            with open(temp_pdf_page, "wb") as f:
+                writer.write(f)
+
+            # Convertir esa página PDF a DOCX
+            nombre_docx, extension = os.path.splitext(os.path.basename(ruta_pdf))
+            nombre_salida_docx = f"{nombre_docx} (Pag. {num_pagina}){extension}"
+            ruta_salida_docx = os.path.join(carpeta_salida, nombre_salida_docx)
+
+            cv = Converter(temp_pdf_page)
+            cv.convert(ruta_salida_docx, start=0, end=0)  # Solo tiene una página
+            cv.close()
+
+            os.remove(temp_pdf_page)
+
+        except Exception as e:
+            print(f"Error exportando página {num_pagina} a DOCX: {e}")
+            QMessageBox.critical(None, "Error", f"No se pudo exportar la página {num_pagina} a DOCX:\n{str(e)}")
+
 class WorkerBusqueda(QObject):
     volverSignal = pyqtSignal()
     terminado = pyqtSignal(object)  # Signal to emit results
+
+    export_methods = {
+        "todo": {  # Exportar todo a un solo archivo
+            ".pdf": exportar_a_pdf,
+            ".docx": exportar_a_docx
+        },
+        "pagina": {  # Exportar por página
+            ".pdf": extraer_pdf_a_pdfs,
+            ".docx": extraer_docx_a_docx
+        }
+    }
 
     def __init__(self, archivos_pdf, palabras_clave, main_window, apellido_paciente, nombre_paciente):
         self.main_window = main_window
@@ -97,6 +228,21 @@ class WorkerBusqueda(QObject):
     def obtener_resultados(self):
         return self.resultados
     
+    def pedir_tipo_exportacion(self):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Question)
+        msg.setWindowTitle(T("WB_type_exportation"))
+        msg.setText(T("WB_question_exportation"))
+        btn_todo = msg.addButton(T("WB_option_exportation_1"), QMessageBox.YesRole)
+        btn_pagina = msg.addButton(T("WB_option_exportation_2"), QMessageBox.NoRole)
+        msg.exec_()
+
+        if msg.clickedButton() == btn_todo:
+            return "todo"
+        elif msg.clickedButton() == btn_pagina:
+            return "pagina"
+        return None
+    
     def check_for_empty_pages(self):
         for direccion_path in self.resultados:
             paginas_por_documento = self.resultados[direccion_path]
@@ -107,15 +253,19 @@ class WorkerBusqueda(QObject):
                 
         # Si el bucle termina, significa que no se encontró ningún documento con páginas.
         return True
-    
+
     def exportar_resultados(self):
-        print(self.resultados)
+        
         if self.check_for_empty_pages():
             QMessageBox.warning(None, T("WB_warning_1a"), T("WB_warning_1b"))
             return
 
         ruta_base = os.path.join(os.path.expanduser("~"), "Documents", "PDF Scanner", "extracciones")
         os.makedirs(ruta_base, exist_ok=True)
+
+        tipo_exportacion = self.pedir_tipo_exportacion()
+        if tipo_exportacion is None:
+            return
 
         folder_path = QFileDialog.getExistingDirectory(
             self.main_window, T("WB_search"), ruta_base
@@ -150,28 +300,11 @@ class WorkerBusqueda(QObject):
                 try:
                     ext = os.path.splitext(ruta_pdf)[1].lower()
 
-                    if ext == ".pdf":
-                        reader = PdfReader(ruta_pdf)
-                        for num_pagina in sorted(paginas_set):
-                            if 0 < num_pagina <= len(reader.pages):
-                                writer = PdfWriter()
-                                writer.add_page(reader.pages[num_pagina - 1])
-
-                                nombre_base, extension = os.path.splitext(os.path.basename(ruta_pdf))
-                                nombre_salida = f"{nombre_base} (Pag. {num_pagina}){extension}"
-                                ruta_salida = os.path.join(carpeta_salida, nombre_salida)
-
-                                with open(ruta_salida, "wb") as f:
-                                    writer.write(f)
-                            else:
-                                print(f"Página {num_pagina} fuera de rango en {ruta_pdf}")
-
-                    elif ext == ".docx":
-                        self.extraer_docs_a_docs(ruta_pdf, paginas_set, carpeta_salida)    # Para exportar a DOCX
-                        #self.extraer_docs_a_pdfs(ruta_pdf, paginas_set, carpeta_salida)     # Para exportar a PDF
-
+                    if ext in self.export_methods[tipo_exportacion]:
+                        funcion_exportar = self.export_methods[tipo_exportacion][ext]
+                        funcion_exportar(ruta_pdf, paginas_set, carpeta_salida)
                     else:
-                        print(f"Tipo de archivo no soportado: {ruta_pdf}")
+                        print(f"Formato no soportado: {ext}")
 
                 except Exception as e:
                     print(f"Error exportando para palabra '{palabra}': {e}")
@@ -183,7 +316,8 @@ class WorkerBusqueda(QObject):
                                 f"{T('WB_success_2')}\n\n{final_dir}")
         self.volverSignal.emit()
 
-    def extraer_docs_a_pdfs(self, ruta_pdf, paginas_set, carpeta_salida):
+    """Por las dudas"""
+    def extraer_docs_a_pdfs(self, ruta_pdf, paginas_set, carpeta_salida):       
         temp_dir = os.path.join(tempfile.gettempdir(), "scanner_pdf_temp")
         nombre_base = os.path.splitext(os.path.basename(ruta_pdf))[0]
         ruta_pdf_temp = os.path.join(temp_dir, f"{nombre_base}.pdf")
@@ -206,41 +340,3 @@ class WorkerBusqueda(QObject):
                     writer.write(f)
             else:
                 print(f"Página {num_pagina} fuera de rango en {ruta_pdf}")
-    
-    def extraer_docs_a_docs(self, ruta_pdf, paginas_set, carpeta_salida):
-        temp_dir = os.path.join(tempfile.gettempdir(), "scanner_pdf_temp")
-        nombre_base = os.path.splitext(os.path.basename(ruta_pdf))[0]
-        ruta_pdf_temp = os.path.join(temp_dir, f"{nombre_base}.pdf")
-
-        if not os.path.exists(ruta_pdf_temp):
-            print(f"PDF temporal no encontrado para {ruta_pdf}")
-            return
-
-        for num_pagina in sorted(paginas_set):
-            try:
-                # Crear un PDF temporal que solo contenga esa página
-                reader = PdfReader(ruta_pdf_temp)
-                writer = PdfWriter()
-                if 0 < num_pagina <= len(reader.pages):
-                    writer.add_page(reader.pages[num_pagina - 1])
-                else:
-                    continue
-
-                # Guardar temporalmente la página como PDF individual
-                temp_pdf_page = os.path.join(tempfile.gettempdir(), f"temp_page_{num_pagina}.pdf")
-                with open(temp_pdf_page, "wb") as f:
-                    writer.write(f)
-
-                # Convertir esa página PDF a DOCX
-                nombre_docx, extension = os.path.splitext(os.path.basename(ruta_pdf))
-                nombre_salida_docx = f"{nombre_docx} (Pag. {num_pagina}){extension}"
-                ruta_salida_docx = os.path.join(carpeta_salida, nombre_salida_docx)
-
-                cv = Converter(temp_pdf_page)
-                cv.convert(ruta_salida_docx, start=0, end=0)  # Solo tiene una página
-                cv.close()
-
-                os.remove(temp_pdf_page)
-
-            except Exception as e:
-                print(f"Error exportando página {num_pagina} a DOCX: {e}")
