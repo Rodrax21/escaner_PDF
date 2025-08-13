@@ -25,7 +25,7 @@
     "AU_question_c": "Do you want to download it now?",
     "AU_critical_2a": "Could not download the installer.",
     "WB_type_exportation": "Export Type",
-    "WB_question_exportation": "How does your stupid ass boss want the pages to be exported?",
+    "WB_question_exportation": "How do you want the files to be exported?",
     "WB_option_exportation_1": "All in a single file",
     "WB_option_exportation_2": "A file per page",
     "WB_critical_docs": "Error converting DOCX to PDF: ",
