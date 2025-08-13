@@ -43,10 +43,16 @@ jobs:
           $replacement = "AppVersion=$newVersion"
           (Get-Content script_instalacion.iss) -replace $pattern, $replacement | Set-Content script_instalacion.iss
 
+          python scripts/update_manifest.py $newVersion
+
       # Ejecuta PyInstaller con tu archivo .spec
-      - name: Run PyInstaller
+      - name: Run PyInstaller for app
         run: |
-          pyinstaller Scanner_PDF.spec
+          pyinstaller --clean Scanner_PDF.spec
+
+      - name: Run PyInstaller for launcher
+        run: |
+          pyinstaller --clean launcher.spec
 
       # Descarga e instala Inno Setup de forma silenciosa
       - name: Install Inno Setup via Chocolatey

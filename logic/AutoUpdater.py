@@ -1,5 +1,5 @@
 # logic/AutoUpdater.py
-
+""" Se que esto es horrible pero es para evitar cambiar todos los demas script que actualizan/usan __version__
 import requests
 import os
 import sys
@@ -7,10 +7,12 @@ import tempfile
 import subprocess
 from PyQt5.QtWidgets import QMessageBox
 from logic.Translator import get_translation as T
+"""
 
 # Versión actual del programa
-__version__ = "v1.0.2"  # Se actualizará automáticamente en el flujo de trabajo de GitHub
+__version__ = "v1.0.15"  # Se actualizará automáticamente en el flujo de trabajo de GitHub
 
+"""
 GITHUB_USER = "Rodrax21"
 GITHUB_REPO = "escaner_PDF"
 
@@ -74,3 +76,4 @@ def comprobar_actualizaciones(parent=None):
                 ejecutar_instalador_y_salir(ruta)
             else:
                 QMessageBox.critical(parent, "Error", T("AU_critical_2a"))
+"""

@@ -25,10 +25,11 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "dist\PDF Scanner v1\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "dist\launcher.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\PDF Scanner"; Filename: "{app}\PDF Scanner v1.exe"; 
-Name: "{commondesktop}\PDF Scanner"; Filename: "{app}\PDF Scanner v1.exe"; Tasks: desktopicon; 
+Name: "{group}\PDF Scanner"; Filename: "{app}\launcher.exe"; 
+Name: "{commondesktop}\PDF Scanner"; Filename: "{app}\launcher.exe"; Tasks: desktopicon;
 
 [Run]
 Filename: "{app}\PDF Scanner v1.exe"; Description: "Ejecutar PDF Scanner"; Flags: nowait postinstall skipifsilent
