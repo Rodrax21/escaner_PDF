@@ -5,8 +5,8 @@ import hashlib
 from pathlib import Path
 
 # Ruta absoluta al directorio raíz del proyecto
-ROOT_DIR = Path(__file__).resolve().parent
-MANIFEST_PATH = os.path.join(Path(__file__).resolve().parent.parent, "manifest.json")
+ROOT_DIR = Path(__file__).resolve().parent.parent
+MANIFEST_PATH = os.path.join(ROOT_DIR, "manifest.json")
 
 # Carpetas y extensiones a excluir
 EXCLUDED_DIRS = {".git", "__pycache__", "build", "dist"}
@@ -45,7 +45,7 @@ def update_manifest(new_version=None):
 
     all_files = get_all_files()
     for path in all_files:
-        relative_path = str(path.relative_to(ROOT_DIR))
+        relative_path = path.relative_to(ROOT_DIR).as_posix()
         manifest["files"][relative_path] = md5(path)
 
     if new_version:
