@@ -9,10 +9,10 @@ from pathlib import Path
 from PyQt5.QtWidgets import QMessageBox
 from logic.Translator import get_translation as T
 
-# URL directa al manifest del último release en GitHub
 MANIFEST_URL = "https://raw.githubusercontent.com/Rodrax21/escaner_PDF/main/manifest.json"
 APP_EXE_NAME = "PDF Scanner v1.exe"
 BACKUP_DIR = "backup_launcher"
+LOCAL_MANIFEST_FILE = "manifest_local.json"
 
 def md5(fname):
     hash_md5 = hashlib.md5()
@@ -49,14 +49,12 @@ def actualizar_archivos(install_dir, archivos):
         url = f"https://raw.githubusercontent.com/Rodrax21/escaner_PDF/main/{path}"
         local_path = os.path.join(install_dir, path)
 
-        # Respaldo del archivo actual
         if os.path.exists(local_path):
             rel_path = os.path.relpath(local_path, install_dir)
             backup_file = os.path.join(backup_path, rel_path)
             os.makedirs(os.path.dirname(backup_file), exist_ok=True)
             shutil.copy2(local_path, backup_file)
 
-        # Descargar y reemplazar
         if not descargar_archivo(url, local_path):
             print(f"No se pudo actualizar {path}. Se mantiene la versión anterior.")
 
@@ -70,22 +68,47 @@ def ejecutar_app(install_dir):
     else:
         print(f"No se encontró {APP_EXE_NAME} en {install_dir}")
 
+def cargar_manifest_local(install_dir):
+    manifest_path = os.path.join(install_dir, LOCAL_MANIFEST_FILE)
+    if os.path.exists(manifest_path):
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            pass
+    return {}
+
+def guardar_manifest_local(install_dir, manifest):
+    manifest_path = os.path.join(install_dir, LOCAL_MANIFEST_FILE)
+    try:
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        print(f"No se pudo guardar el manifest local: {e}")
+
 def main():
     install_dir = Path(sys.executable).parent
 
-    # Descargar manifest
+    # Descargar manifest remoto
     try:
         with urllib.request.urlopen(MANIFEST_URL, timeout=30) as response:
-            manifest = json.load(response)
+            manifest_remoto = json.load(response)
     except Exception as e:
-        print("Error descargando manifest:", e)
+        print("Error descargando manifest remoto:", e)
         ejecutar_app(install_dir)
         return
 
-    # Verificar archivos a actualizar
-    archivos = archivos_a_actualizar(install_dir, manifest)
+    # Comparar con manifest local
+    manifest_local = cargar_manifest_local(install_dir)
+    if manifest_local.get("version") == manifest_remoto.get("version"):
+        print("Versión actualizada. No es necesario verificar archivos.")
+        ejecutar_app(install_dir)
+        return
+
+    # Calcular cambios
+    archivos = archivos_a_actualizar(install_dir, manifest_remoto)
     if archivos:
-        ultima_version = manifest.get("version", "desconocida")
+        ultima_version = manifest_remoto.get("version", "desconocida")
         respuesta = QMessageBox.question(
             None,
             T("AU_question_a"),
@@ -95,10 +118,11 @@ def main():
         if respuesta == QMessageBox.Yes:
             print("Archivos a actualizar:", archivos)
             actualizar_archivos(install_dir, archivos)
+            guardar_manifest_local(install_dir, manifest_remoto)
     else:
-        print("Todo actualizado")
+        print("No hay cambios en los archivos.")
+        guardar_manifest_local(install_dir, manifest_remoto)
 
-    # Ejecutar la app principal
     ejecutar_app(install_dir)
 
 if __name__ == "__main__":

@@ -47,6 +47,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    onefile=True
-    icon='resources/Antodrogas.ico'
+    onefile=True,
+    icon='resources/Antodrogas.ico',
 )
