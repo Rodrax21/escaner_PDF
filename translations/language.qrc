@@ -2,6 +2,5 @@
   <qresource prefix="/">
     <file>en.json</file>
     <file>es.json</file>
-    <file>fr.json</file>
   </qresource>
 </RCC>

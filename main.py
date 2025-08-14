@@ -106,5 +106,5 @@ if __name__ == '__main__':
     ventana.centrar_ventana()
     ventana.show()
     #ventana.limpiar_temporales_antiguos()
-    #AutoUpdater.comprobar_actualizaciones(parent=ventana)
+    AutoUpdater.comprobar_actualizaciones(parent=ventana)
     sys.exit(app.exec_())

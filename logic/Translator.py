@@ -8,7 +8,7 @@ AVAILABLE_LANGUAGES = {}
 language_order = []
 
 # Cargar todos los archivos .json de traducciones embebidos
-for lang_code in ["en","es","fr"]:  # Podés hacer que esto venga de otro lado si querés
+for lang_code in ["en","es"]:  # Podés hacer que esto venga de otro lado si querés
     file = QFile(f":/{lang_code}.json")
     if file.open(QFile.ReadOnly | QFile.Text):
         stream = QTextStream(file)
