@@ -6,7 +6,7 @@ from pathlib import Path
 
 # Ruta absoluta al directorio raíz del proyecto
 ROOT_DIR = Path(__file__).resolve().parent
-MANIFEST_PATH = ROOT_DIR / "manifest.json"
+MANIFEST_PATH = os.path.join(Path(__file__).resolve().parent.parent, "manifest.json")
 
 # Carpetas y extensiones a excluir
 EXCLUDED_DIRS = {".git", "__pycache__", "build", "dist"}
