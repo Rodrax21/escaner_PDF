@@ -37,7 +37,7 @@ def get_all_files():
 
 def update_manifest(new_version=None):
     """Actualiza o crea el manifest.json con la versión y los hashes."""
-    if MANIFEST_PATH.exists():
+    if os.path.exists(MANIFEST_PATH):
         with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
             manifest = json.load(f)
     else:
